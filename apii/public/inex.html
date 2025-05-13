@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BBQ Nation Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #chat-container {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 8px 12px;
+      border-radius: 18px;
+      max-width: 80%;
+    }
+    .user-message {
+      background-color: #e3f2fd;
+      margin-left: auto;
+    }
+    .bot-message {
+      background-color: #f1f1f1;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>BBQ Nation Chatbot</h2>
+  <div id="chat-container"></div>
+  <input type="text" id="user-input" placeholder="Type your message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('user-input');
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage(message, 'user');
+
+      try {
+        const res = await fetch('http://localhost:3001/api/conversation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userMessage: message })
+        });
+
+        const data = await res.json();
+        appendMessage(data.botReply, 'bot');
+      } catch (err) {
+        appendMessage("Oops! Server's being moody.", 'bot');
+      }
+
+      input.value = '';
+    }
+
+    function appendMessage(text, sender) {
+      const chat = document.getElementById('chat-container');
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', `${sender}-message`);
+      msgDiv.textContent = text;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
